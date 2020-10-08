@@ -1,0 +1,125 @@
+{
+  "resourceType": "Bundle",
+  "id": "bundle-transaction",
+  "type": "transaction",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "MedicinalProduct",
+        "name": [
+          {
+            "productName": "Medicatex 10 g",
+            "namePart": [
+              {
+                "part": "Medicatex",
+                "type": {
+                  "code": "INV"
+                }
+              },
+              {
+                "part": "10 g",
+                "type": {
+                  "code": "STR"
+                }
+              },
+              {
+                "part": "Comprimido",
+                "type": {
+                  "code": "FRM"
+                }
+              }
+            ],
+            "countryLanguage": [
+              {
+                "country": {
+                  "coding": [
+                    {
+                      "system": "http://www.saude.gov.br/fhir/countryCode",
+                      "code": "BR"
+                    }
+                  ]
+                },
+                "jurisdiction": {
+                  "coding": [
+                    {
+                      "system": "http://www.saude.gov.br/fhir/jurisdictionCode",
+                      "code": "BR"
+                    }
+                  ]
+                },
+                "language": {
+                  "coding": [
+                    {
+                      "system": "http://www.saude.gov.br/fhir/languageCode",
+                      "code": "BR"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "pharmaceuticalProduct": {
+          "reference": "urn:uuid:74891afc-ed52-42a2-bcd7-f13d9b60f096"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "MedicinalProduct"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:88f151c0-a954-468a-88bd-5ae15c08e059",
+      "resource": {
+        "resourceType": "MedicinalProductIngredient",
+        "role": {
+          "system": "http://www.saude.gov.br/fhir/ingredientRole",
+          "code": "active ingredient"
+        },
+        "substance": {
+          "code": {
+            "system": "http://www.saude.gov.br/fhir/substance",
+            "code": "Amoxicilina"
+          },
+          "strength": [
+            {
+              "presentation": {
+                "numerator": {
+                  "value": "10",
+                  "unit": "g"
+                },
+                "denominator": {
+                  "value": 1,
+                  "unit": "Comprimido"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "MedicinalProductIngredient"
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:74891afc-ed52-42a2-bcd7-f13d9b60f096",
+      "resource": {
+        "resourceType": "MedicinalProductPharmaceutical",
+        "administrableDoseForm": {
+          "system": "http://www.saude.gov.br/fhir/administrableDoseForm",
+          "code": "Comprimido"
+        },
+        "ingredient": [
+          {
+            "reference": "urn:uuid:88f151c0-a954-468a-88bd-5ae15c08e059"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "MedicinalProductPharmaceutical"
+      }
+    }
+  ]
+}

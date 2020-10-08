@@ -1,0 +1,14 @@
+version: '3.7'
+services:
+  web:
+    image: "hapiproject/hapi:v5.1.0"
+    ports:
+      - "8090:8080"
+    volumes:
+      - hapi-data:/usr/local/tomcat/target/database
+    environment:
+      hapi.fhir.cors.allowed_origin: "*" 
+      hapi.fhir.reuse_cached_search_results_millis: 1
+volumes:
+    hapi-data:
+      external: true

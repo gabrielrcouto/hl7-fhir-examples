@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+    <title>Prescrever - S-RES 🔥</title>
+  </head>
+  <body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">S-RES 🔥</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item active">
+            <a class="nav-link" href="autorizar-produto.html">Autorizar Produto</a>
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="registrar-produto.html">Registrar Produto</a>
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="registrar-interacao.html">Registrar Interação</a>
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="prescrever.html">Prescrever</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="container">
+      <h2>Prescrever</h2>
+
+      <form>
+        <div class="form-group">
+          <label>Nome do Paciente</label>
+          <input type="text" class="form-control" id="productName" value="João Silva">
+        </div>
+
+        <div class="form-group">
+          <label>Medicamento</label>
+          <select id="medication1" class="form-control">
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Medicamento</label>
+          <select id="medication2" class="form-control">
+          </select>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Prescrever</button>
+      </form>
+
+      <div id="result" class="row" style="padding-top: 30px;"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+      let medicinalProductInteractions = [];
+
+      /**
+       * Gera o objeto Bundle, o qual obterá a lista de três recursos FHIR
+       * MedicinalProduct, MedicinalProductAuthorization e MedicinalProductInteraction.
+       * Em uma futura melhoria, o MedicinalProductInteraction pode ser obtido somente após
+       * o médico tentar prescrever um determinado medicamento, filtrando a coleção pelos medicamentos
+       * escolhidos.
+       */
+      function getBundleObject() {
+        return {
+          "resourceType": "Bundle",
+          "id": "bundle-batch",
+          "type": "batch",
+          "entry": [
+            {
+              "request": {
+                "method": "GET",
+                "url": "/MedicinalProduct"
+              }
+            },
+            {
+              "request": {
+                "method": "GET",
+                "url": "/MedicinalProductAuthorization"
+              }
+            },
+            {
+              "request": {
+                "method": "GET",
+                "url": "/MedicinalProductInteraction"
+              }
+            }
+          ]
+        };
+      };
+
+      /**
+       * Renderiza os campos de seleção de medicamentos
+       */
+      function renderSelects() {
+        const settings = {
+          async: true,
+          contentType: 'application/fhir+json',
+          crossDomain: true,
+          url: 'http://localhost:8090/fhir/',
+          method: 'POST',
+          data: JSON.stringify(getBundleObject()),
+          dataType: 'json',
+          processData: false
+        };
+
+        $('#medication1').html('<option value="" selected disabled>Selecione o medicamento</option>');
+        $('#medication2').html('<option value="" selected disabled>Selecione o medicamento</option>');
+
+        $.ajax(settings).done((response) => {
+          // Somente medicamentos autorizados serão mostrados
+          const authorizedSubjects = response.entry[1].resource.entry.map((item) => item.resource.subject.reference);
+
+          medicinalProductInteractions = response.entry[2].resource.entry;
+
+          response.entry[0].resource.entry.forEach((entry) => {
+            const medicinalProduct = entry.resource;
+            const authorized = authorizedSubjects.includes('MedicinalProduct/' + medicinalProduct.id);
+
+            if (! medicinalProduct.name || ! authorized) return;
+
+            $('#medication1').append(`
+              <option value="${medicinalProduct.id}">${medicinalProduct.name[0].productName}</option>
+            `);
+
+            $('#medication2').append(`
+              <option value="${medicinalProduct.id}">${medicinalProduct.name[0].productName}</option>
+            `);
+          });
+        });
+      };
+
+      $(document).ready(() => {
+        renderSelects();
+
+        $('form').submit(() => {
+          const medicinalProduct1Id = 'MedicinalProduct/' + $('#medication1').val();
+          const medicinalProduct2Id = 'MedicinalProduct/' + $('#medication2').val();
+          const medicinalProduct1Name = $('#medication1 option:selected').text();
+          const medicinalProduct2Name = $('#medication2 option:selected').text();
+
+          const foundInteractions = medicinalProductInteractions.reduce((accumulator, entry) => {
+            const medicinalProductInteraction = entry.resource;
+
+            // Identifica se existe uma interação medicamentosa que envolve o medicamento
+            if (
+              medicinalProductInteraction.subject[0].reference === medicinalProduct1Id &&
+              medicinalProductInteraction.interactant[0].itemReference.reference === medicinalProduct2Id
+            ) {
+              accumulator.push(medicinalProductInteraction);
+            }
+
+            return accumulator;
+          }, []);
+
+          if (foundInteractions.length === 0) {
+            $('#result').html('<div class="alert alert-success" role="alert">Prescrição realizada com sucesso</div>');
+            return false;
+          }
+
+          $('#result').html(`<div class="alert alert-danger" role="alert">Foi encontrada interação medicamentosa entre os medicamentos <strong>${medicinalProduct1Name}</strong> e <strong>${medicinalProduct2Name}</strong></div>`);
+
+          return false;
+        });
+      });
+    </script>
+  </body>
+</html>

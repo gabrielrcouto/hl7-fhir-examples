@@ -1,0 +1,14 @@
+{
+  "resourceType": "MedicinalProductAuthorization",
+  "subject": {
+    "reference": "MedicinalProduct/17"
+  },
+  "status": {
+    "coding": [
+      {
+        "system": "http://www.saude.gov.br/fhir/authorisationStatus",
+        "code": "active"
+      }
+    ]
+  }
+}

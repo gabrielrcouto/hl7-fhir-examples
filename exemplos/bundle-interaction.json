@@ -1,0 +1,45 @@
+{
+  "resourceType": "Bundle",
+  "id": "bundle-transaction",
+  "type": "transaction",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "MedicinalProductInteraction",
+        "subject": {
+          "reference": "MedicinalProduct/13"
+        },
+        "interactant": [
+          {
+            "itemReference": {
+              "reference": "MedicinalProduct/17"
+            }
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "MedicinalProductInteraction"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "MedicinalProductInteraction",
+        "subject": {
+          "reference": "MedicinalProduct/17"
+        },
+        "interactant": [
+          {
+            "itemReference": {
+              "reference": "MedicinalProduct/13"
+            }
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "MedicinalProductInteraction"
+      }
+    }
+  ]
+}
